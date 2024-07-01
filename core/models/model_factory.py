@@ -41,8 +41,7 @@ class Model(object):
         mask_tensor = torch.FloatTensor(mask).to(self.configs.device).half()
         self.optimizer.zero_grad()
 
-        with autocast(): # was not imported before, if this causes an error just try again
-            next_frames, loss = self.network(frames_tensor, mask_tensor)
+        next_frames, loss = self.network(frames_tensor, mask_tensor)
 
         self.scaler.scale(loss).backward()
         self.scaler.step(self.optimizer)
@@ -54,7 +53,6 @@ class Model(object):
         frames_tensor = torch.FloatTensor(frames).to(self.configs.device).half()
         mask_tensor = torch.FloatTensor(mask).to(self.configs.device).half()
     
-        with autocast():
-            next_frames, _ = self.network(frames_tensor, mask_tensor)
+        next_frames, _ = self.network(frames_tensor, mask_tensor)
 
         return next_frames.detach().cpu().numpy()

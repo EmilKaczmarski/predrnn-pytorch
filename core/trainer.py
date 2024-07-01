@@ -17,8 +17,7 @@ def train(model, ims, real_input_flag, configs, itr):
     
     model.optimizer.zero_grad()
 
-    with autocast():
-        next_frames, loss = model.network(ims, real_input_flag)
+    next_frames, loss = model.network(ims, real_input_flag)
 
     scaler.scale(loss).backward()
 
@@ -35,8 +34,7 @@ def train(model, ims, real_input_flag, configs, itr):
     if configs.reverse_input:
         ims_rev = np.flip(ims.cpu().numpy(), axis=1).copy()
         ims_rev = torch.tensor(ims_rev, dtype=torch.float16).to(configs.device)
-        with autocast():
-            next_frames_rev, loss_rev = model.network(ims_rev, real_input_flag)
+        next_frames_rev, loss_rev = model.network(ims_rev, real_input_flag)
 
         scaler.scale(loss_rev).backward()
 
@@ -97,8 +95,7 @@ def test(model, test_input_handle, configs, itr):
         test_dat = torch.tensor(test_dat, dtype=torch.float16).to(configs.device)
         real_input_flag_tensor = torch.tensor(real_input_flag, dtype=torch.float16).to(configs.device)
         
-        with autocast():
-            img_gen = model.network(test_dat, real_input_flag_tensor)[0]
+        img_gen = model.network(test_dat, real_input_flag_tensor)[0]
 
         img_gen = preprocess.reshape_patch_back(img_gen.detach().cpu().numpy(), configs.patch_size)
         output_length = configs.total_length - configs.input_length 
