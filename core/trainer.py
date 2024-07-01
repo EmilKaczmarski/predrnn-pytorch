@@ -22,8 +22,13 @@ def train(model, ims, real_input_flag, configs, itr):
 
     scaler.scale(loss).backward()
 
+    # ensure gradients are in FP32 before the step
+    for param in model.network.parameters():
+        if param.grad is not None:
+            param.grad.data = param.grad.data.to(torch.float32)
     scaler.step(model.optimizer)
     scaler.update()
+    # the scaler works now, but I'm not sure if we need to cast those gradients back to float16
 
     if configs.reverse_input:
         ims_rev = np.flip(ims.cpu().numpy(), axis=1).copy()
@@ -32,6 +37,11 @@ def train(model, ims, real_input_flag, configs, itr):
             next_frames_rev, loss_rev = model.network(ims_rev, real_input_flag)
 
         scaler.scale(loss_rev).backward()
+
+        # ensure gradients are in FP32 before the step
+        for param in model.network.parameters():
+            if param.grad is not None:
+                param.grad.data = param.grad.data.to(torch.float32)
 
         scaler.step(model.optimizer)
         scaler.update()
