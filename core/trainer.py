@@ -26,9 +26,11 @@ def train(model, ims, real_input_flag, configs, itr):
     for param in model.network.parameters():
         if param.grad is not None:
             param.grad.data = param.grad.data.to(torch.float32)
+
     scaler.step(model.optimizer)
     scaler.update()
     # the scaler works now, but I'm not sure if we need to cast those gradients back to float16
+    print('scaler update succesful')
 
     if configs.reverse_input:
         ims_rev = np.flip(ims.cpu().numpy(), axis=1).copy()

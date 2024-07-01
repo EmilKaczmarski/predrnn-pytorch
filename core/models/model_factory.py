@@ -1,7 +1,7 @@
 import os
 import torch
 from torch.optim import Adam
-from torch.cuda.amp import autocast, GradScaler
+from torch.cuda.amp import GradScaler, autocast
 from core.models import predrnn_v2, action_cond_predrnn_v2
 
 class Model(object):
@@ -41,7 +41,7 @@ class Model(object):
         mask_tensor = torch.FloatTensor(mask).to(self.configs.device).half()
         self.optimizer.zero_grad()
 
-        with autocast():
+        with autocast(): # was not imported before, if this causes an error just try again
             next_frames, loss = self.network(frames_tensor, mask_tensor)
 
         self.scaler.scale(loss).backward()
@@ -53,7 +53,7 @@ class Model(object):
     def test(self, frames, mask):
         frames_tensor = torch.FloatTensor(frames).to(self.configs.device).half()
         mask_tensor = torch.FloatTensor(mask).to(self.configs.device).half()
-
+    
         with autocast():
             next_frames, _ = self.network(frames_tensor, mask_tensor)
 
